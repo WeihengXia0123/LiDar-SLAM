@@ -149,7 +149,6 @@ bool FrontEnd::Update(const CloudData& cloud_data, Eigen::Matrix4f& cloud_pose) 
         last_key_frame_pose = current_frame_.pose;
     }
 
-    std::cout <<"return true" << std::endl;
     return true;
 }
 

@@ -19,6 +19,7 @@ frame_filter: voxel_filter # 选择当前帧点云滤波方法，目前支持：
 ## 匹配相关参数
 
 myICP:
+    max_corr_dist : 1.2
     max_iteration : 30
     min_threshold : 0.0001
 
@@ -33,11 +34,7 @@ NDT:
     step_size : 0.1
     trans_eps : 0.01
     max_iter : 30
-ICP_SVD:
-    max_corr_dist : 1.2
-    trans_eps : 0.01
-    euc_fitness_eps : 0.36
-    max_iter : 10
+
 ## 滤波相关参数
 voxel_filter:
     local_map:

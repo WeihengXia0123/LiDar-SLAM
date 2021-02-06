@@ -49,14 +49,10 @@ bool FrontEndFlow::Run() {
         if (!ValidData()) {
             continue;
         }
-            
         UpdateGNSSOdometry();
         if (UpdateLaserOdometry()) {
-            std::cout << "update laser odometry success" << std::endl;
             PublishData();
-            std::cout << "published data" << std::endl;
             SaveTrajectory();
-            std::cout << "saved trajectory" << std::endl;
         } else {
             LOG(INFO) << "UpdateLaserOdometry failed!" << std::endl;
         }
@@ -205,17 +201,12 @@ bool FrontEndFlow::UpdateLaserOdometry() {
 bool FrontEndFlow::PublishData() {
     laser_odom_pub_ptr_->Publish(laser_odometry_);
     gnss_pub_ptr_->Publish(gnss_odometry_);
-    
-    std::cout<<"Trying to GetCurrentScan"<<std::endl;
     front_end_ptr_->GetCurrentScan(current_scan_ptr_);
-    std::cout<<"Success GetCurrentScan"<<std::endl;
     cloud_pub_ptr_->Publish(current_scan_ptr_);
-    std::cout<<"publishing current_scan_ptr_"<<std::endl;
+
 
     if (front_end_ptr_->GetNewLocalMap(local_map_ptr_))
-        std::cout<<"getNewLocalMap"<<std::endl;
         local_map_pub_ptr_->Publish(local_map_ptr_);
-        std::cout<<"publishing local_map_ptr_"<<std::endl;
     std::cout<<"publishing true"<<std::endl;
     return true;
 }
