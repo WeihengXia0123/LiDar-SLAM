@@ -94,22 +94,22 @@ public:
         double b2 = parameters[0][7];
         double b3 = parameters[0][8];
 
-        double A1 = sample_(0);
-        double A2 = sample_(1);
-        double A3 = sample_(2);
+        double A1 = sample_(0)-b1;
+        double A2 = sample_(1)-b2;
+        double A3 = sample_(2)-b3;
 
-        jacobians[0][0] = -2*(-S1*K1*A1 + K2*A2 - b2) * (-K1*A1);
-        jacobians[0][1] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3 - b3) * (-K1*A1);
-        jacobians[0][2] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3 - b3) * (-K2*A2);
-        jacobians[0][3] = -2*( K1*A1 - b1) * (-K1*K1*A1) \
-                        - 2*(-S1*K1*A1 + K2*A2 - b2)*(S1*K1*K1*A1) \
-                        - 2*(-S2*K1*A1 - S3*K2*A2 + K3*A3 - b3)*(S2*K1*K1*A1);
-        jacobians[0][4] = -2*(-S1*K1*A1 + K2*A2 - b2)*(K1*K1*A1) \
-                        - 2*(-S2*K1*A1 - S3*K2*A2 + K3*A3 - b3)*(S3*K2*K2*A2);
-        jacobians[0][5] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3 - b3)*(-K3*K3*A3);
-        jacobians[0][6] =  2*( K1*A1 - b1);
-        jacobians[0][7] =  2*(-S1*K1*A1 + K2*A2 - b2);
-        jacobians[0][8] =  2*(-S2*K1*A1 - S3*K2*A2 + K3*A3 - b3);
+        jacobians[0][0] = -2*(-S1*K1*A1 + K2*A2) * (-K1*A1);
+        jacobians[0][1] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3) * (-K1*A1);
+        jacobians[0][2] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3) * (-K2*A2);
+        jacobians[0][3] = -2*( K1*A1) * (-K1*K1*A1) \
+                        - 2*(-S1*K1*A1 + K2*A2)*(S1*K1*K1*A1) \
+                        - 2*(-S2*K1*A1 - S3*K2*A2 + K3*A3)*(S2*K1*K1*A1);
+        jacobians[0][4] = -2*(-S1*K1*A1 + K2*A2)*(K1*K1*A1) \
+                        - 2*(-S2*K1*A1 - S3*K2*A2 + K3*A3)*(S3*K2*K2*A2);
+        jacobians[0][5] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3)*(-K3*K3*A3);
+        jacobians[0][6] =  2*( K1*A1);
+        jacobians[0][7] =  2*(-S1*K1*A1 + K2*A2);
+        jacobians[0][8] =  2*(-S2*K1*A1 - S3*K2*A2 + K3*A3);
 			}
 		}
 
