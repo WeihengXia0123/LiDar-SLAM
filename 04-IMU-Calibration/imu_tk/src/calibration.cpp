@@ -76,40 +76,68 @@ public:
     // apply undistortion transform:
     Eigen::Matrix< double, 3 , 1> calib_samp = calib_triad.unbiasNormalize( raw_samp );
     
-    residuals[0] = g_mag_*g_mag_ - calib_samp.transpose()*calib_samp;
+    // residuals[0] = g_mag_*g_mag_ - calib_samp.transpose()*calib_samp;
+    residuals[0] =  g_mag_- calib_samp.norm();
 
 		if(jacobians != NULL)
 		{
 			if(jacobians[0] != NULL)
 			{ 
         double S1 = parameters[0][0];
-        double S2 = -parameters[0][1];
+        double S2 = parameters[0][1];
         double S3 = parameters[0][2];
 
-        double K1 = 1.0/parameters[0][3];
-        double K2 = 1.0/parameters[0][4];
-        double K3 = 1.0/parameters[0][5];
+        double K1 = parameters[0][3];
+        double K2 = parameters[0][4];
+        double K3 = parameters[0][5];
 
         double b1 = parameters[0][6];
         double b2 = parameters[0][7];
         double b3 = parameters[0][8];
 
-        double A1 = sample_(0)-b1;
-        double A2 = sample_(1)-b2;
-        double A3 = sample_(2)-b3;
+        double A1 = sample_(0);
+        double A2 = sample_(1);
+        double A3 = sample_(2);
 
-        jacobians[0][0] = -2*(-S1*K1*A1 + K2*A2) * (-K1*A1);
-        jacobians[0][1] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3) * (-K1*A1);
-        jacobians[0][2] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3) * (-K2*A2);
-        jacobians[0][3] = -2*( K1*A1) * (-K1*K1*A1) \
+        /**
+        // 标量对向量的解析版：
+        jacobians[0][0] = -2*(-S1*K1*A1 + K2*A2 ) * (-K1*A1);
+        jacobians[0][1] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3 ) * (-K1*A1);
+        jacobians[0][2] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3 ) * (-K2*A2);
+        
+        jacobians[0][3] = -2*( K1*A1 ) * (-K1*K1*A1) \
                         - 2*(-S1*K1*A1 + K2*A2)*(S1*K1*K1*A1) \
                         - 2*(-S2*K1*A1 - S3*K2*A2 + K3*A3)*(S2*K1*K1*A1);
         jacobians[0][4] = -2*(-S1*K1*A1 + K2*A2)*(K1*K1*A1) \
                         - 2*(-S2*K1*A1 - S3*K2*A2 + K3*A3)*(S3*K2*K2*A2);
         jacobians[0][5] = -2*(-S2*K1*A1 - S3*K2*A2 + K3*A3)*(-K3*K3*A3);
-        jacobians[0][6] =  2*( K1*A1);
-        jacobians[0][7] =  2*(-S1*K1*A1 + K2*A2);
-        jacobians[0][8] =  2*(-S2*K1*A1 - S3*K2*A2 + K3*A3);
+
+        jacobians[0][6] = 2*K1*(K1*A1) - 2*S1*K1*(-S1*K1*A1+K2*A2) - 2*S2*K1*(-S2*K1*A1-S3*K2*A2+K3*A3);
+        jacobians[0][7] = 2*K2*(-S1*K1*A1+K2*A2) - 2*S3*K2*(-S2*K1*A1-S3*K2*A2+K3*A3); 
+        jacobians[0][8] = 2*K3*(-S2*K1*A1-S3*K2*A2+K3*A3);  
+        **/
+
+        // 向量对向量的解析版：
+        Eigen::MatrixXd a(3, 1);
+        a << K1*(A1-b1), S1*K1*(A1-b1)+K2*(A2-b2), -S2*K1*(A1-b1)+S3*K2*(A2-b2)+K3*(A3-b3);
+
+        Eigen::MatrixXd da_dTheta(3, 9);
+        da_dTheta << 0, K1*(A1-b1), 0, 
+                     0, 0, -K1*(A1-b1), 
+                     0, 0, K2*(A2-b2), 
+                     A1-b1, S1*(A1-b1), -S2*(A1-b1), 
+                     0, A2-b2, S3*(A2-b2), 
+                     0, 0, A3-b3,
+                     -K1, -S1*K1, S2*K1,
+                     0, -K2, -S3*K2,
+                     0, 0 ,-K3;
+
+        Eigen::Map<Eigen::Matrix<double, 1, 9, Eigen::RowMajor> > Jacob(jacobians[0]);
+        Jacob.setZero();
+        // 经过化简后，
+        // J = - (a / ||a||) * da_dTheta
+        Jacob = - calib_samp.transpose()/(calib_samp.norm())*da_dTheta;
+                  
 			}
 		}
 
