@@ -66,33 +66,33 @@ public:
       // mis_yz, mis_zy, mis_zx:
       double(0), double(0), double(0),
       // mis_xz, mis_xy, mis_yx:
-      parameters[0], parameters[1], parameters[2],
+      parameters[0][0], parameters[0][1], parameters[0][2],
       //    s_x,    s_y,    s_z:
-      parameters[3], parameters[4], parameters[5], 
+      parameters[0][3], parameters[0][4], parameters[0][5], 
       //    b_x,    b_y,    b_z: 
-      parameters[6], parameters[7], parameters[8] 
+      parameters[0][6], parameters[0][7], parameters[0][8] 
     );
     
     // apply undistortion transform:
     Eigen::Matrix< double, 3 , 1> calib_samp = calib_triad.unbiasNormalize( raw_samp );
     
-    residuals[0] = g_mag_ - calib_samp.norm();
+    residuals[0] = g_mag_*g_mag_ - calib_samp.transpose()*calib_samp;
 
 		if(jacobians != NULL)
 		{
 			if(jacobians[0] != NULL)
 			{ 
-        double S1 = parameters[0];
-        double S2 = parameters[1];
-        double S3 = parameters[2];
+        double S1 = parameters[0][0];
+        double S2 = -parameters[0][1];
+        double S3 = parameters[0][2];
 
-        double K1 = 1.0/parameters[3];
-        double K2 = 1.0/parameters[4];
-        double K3 = 1.0/parameters[5];
+        double K1 = 1.0/parameters[0][3];
+        double K2 = 1.0/parameters[0][4];
+        double K3 = 1.0/parameters[0][5];
 
-        double b1 = parameters[6];
-        double b2 = parameters[7];
-        double b3 = parameters[8];
+        double b1 = parameters[0][6];
+        double b2 = parameters[0][7];
+        double b3 = parameters[0][8];
 
         double A1 = sample_(0);
         double A2 = sample_(1);
