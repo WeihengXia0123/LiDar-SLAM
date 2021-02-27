@@ -77,7 +77,7 @@ public:
     Eigen::Matrix< double, 3 , 1> calib_samp = calib_triad.unbiasNormalize( raw_samp );
     
     // residuals[0] = g_mag_*g_mag_ - calib_samp.transpose()*calib_samp;
-    residuals[0] =  g_mag_- calib_samp.norm();
+    residuals[0] = g_mag_- calib_samp.norm();
 
 		if(jacobians != NULL)
 		{
@@ -122,21 +122,27 @@ public:
         a << K1*(A1-b1), S1*K1*(A1-b1)+K2*(A2-b2), -S2*K1*(A1-b1)+S3*K2*(A2-b2)+K3*(A3-b3);
 
         Eigen::MatrixXd da_dTheta(3, 9);
-        da_dTheta << 0, K1*(A1-b1), 0, 
-                     0, 0, -K1*(A1-b1), 
-                     0, 0, K2*(A2-b2), 
-                     A1-b1, S1*(A1-b1), -S2*(A1-b1), 
-                     0, A2-b2, S3*(A2-b2), 
-                     0, 0, A3-b3,
-                     -K1, -S1*K1, S2*K1,
-                     0, -K2, -S3*K2,
-                     0, 0 ,-K3;
+        da_dTheta << 0, 0, 0, A1-b1, 0, 0, -K1, 0, 0, 
+                    K1*(A1-b1), 0, 0, S1*(A1-b1), A2-b2, 0, -S1*K1, -K2, 0,
+                    0, -K1*(A1-b1), K2*(A2-b2), -S2*(A1-b1), S3*(A2-b2), A3-b3, S2*K1, -S3*K2, -K3;
+
+        // da_dTheta << 0, K1*(A1-b1), 0, 
+        //              0, 0, -K1*(A1-b1), 
+        //              0, 0, K2*(A2-b2), 
+        //              A1-b1, S1*(A1-b1), -S2*(A1-b1), 
+        //              0, A2-b2, S3*(A2-b2), 
+        //              0, 0, A3-b3,
+        //              -K1, -S1*K1, S2*K1,
+        //              0, -K2, -S3*K2,
+        //              0, 0 ,-K3;
 
         Eigen::Map<Eigen::Matrix<double, 1, 9, Eigen::RowMajor> > Jacob(jacobians[0]);
         Jacob.setZero();
         // 经过化简后，
         // J = - (a / ||a||) * da_dTheta
-        Jacob = - calib_samp.transpose()/(calib_samp.norm())*da_dTheta;
+        // Jacob = - a.transpose() / a.norm() * da_dTheta;
+        Jacob = - calib_samp.transpose() / calib_samp.norm() * da_dTheta;
+        // Jacob = - 2 * calib_samp.transpose() * da_dTheta;
                   
 			}
 		}
